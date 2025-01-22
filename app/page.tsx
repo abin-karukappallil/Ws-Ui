@@ -47,6 +47,7 @@ export default function DarkWebScraper() {
 
     } catch (error) {
       console.error("Error during scrape:", error);
+      setResults("An error occurred during the scraping process.");
     } finally {
       setIsLoading(false);
     }
