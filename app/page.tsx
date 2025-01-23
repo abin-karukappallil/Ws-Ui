@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
 import { motion, AnimatePresence } from "framer-motion"
 import { Loader2 } from "lucide-react"
-
+import axios from "axios"
 export default function DarkWebScraper() {
   const [url, setUrl] = useState("")
   const [method, setMethod] = useState("id")
@@ -32,19 +32,47 @@ export default function DarkWebScraper() {
         const response = await fetch(api);
         if (!response.ok) {
           throw new Error("Failed to fetch the file");
+        } else {
+          const blob = await response.blob();
+          const fileURL = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = fileURL;
+          link.download = "docsLink.txt";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(fileURL);
         }
-        const blob = await response.blob(); 
-        const fileURL = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = fileURL;
-        link.download = "docsLink.txt";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(fileURL);
+      } else if (method === "hidden-links") {
+        const api = `http://localhost:8000/scrape-hiddenlinks?url=${url}`
+        const response = await fetch(api);
+        if (!response.ok) {
+          throw new Error("Failed to fetch the file");
+        } else {
+          const blob = await response.blob();
+          const fileURL = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = fileURL;
+          link.download = "hiddenlinks.txt";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(fileURL);
+        }
+      } else if (method === "class") {
+        try {
+          const api = `http://localhost:8000/scrape-class?url=${url}&_class=${selector}`;
+          console.log(api);
+          const response = await axios.get(api);
+          if (response.status !== 200) {
+            throw new Error("Failed to fetch the data");
+          }
+          const data = response.data;
+          setResults(data);
+        } catch (error) {
+          console.error(error);
+        }
       }
-
-
     } catch (error) {
       console.error("Error during scrape:", error);
       setResults("An error occurred during the scraping process.");
@@ -136,7 +164,6 @@ export default function DarkWebScraper() {
                 >
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Scrape"}
                 </Button>
-
               </motion.div>
             </form>
 
@@ -149,31 +176,46 @@ export default function DarkWebScraper() {
                   transition={{ duration: 0.5 }}
                   className="mt-4"
                 >
-                    <pre className="bg-gray-700 p-2 rounded mt-2 overflow-x-auto text-sm text-gray-200">
-                    Scrapping..this may take a while..☕
-                    </pre>
+                  <pre className="bg-gray-700 p-2 rounded mt-2 overflow-x-auto text-sm text-gray-200">
+                    Scraping... this may take a while..☕
+                  </pre>
                 </motion.div>
               ) : (
                 results && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ duration: 0.5 }}
-                    className="mt-4"
-                  >
-                    <pre className="bg-gray-700 p-2 rounded mt-2 overflow-x-auto text-sm text-gray-200">
-                      Sucessfully scraped the website
-                    </pre>
-                  </motion.div>
+                  method === "class" ? (
+                    <div className="bg-gray-700 p-2 rounded mt-2 overflow-x-auto max-h-60 text-sm text-gray-200">
+                      {Array.isArray(results) ? (
+                        results.map((item, index) => (
+                          <div key={index} className="mb-2 pb-2 border-b border-gray-600 last:border-b-0">
+                            {item.data}
+                          </div>
+                        ))
+                      ) : (
+                        <pre>{typeof results === "object" ? JSON.stringify(results, null, 2) : results}</pre>
+                      )}
+                    </div>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ duration: 0.5 }}
+                      className="mt-4"
+                    >
+                      <pre className="bg-gray-700 p-2 rounded mt-2 overflow-x-auto text-sm text-gray-200">
+                        successfully scraped
+                      </pre>
+                    </motion.div>
+                  )
                 )
               )}
-            </AnimatePresence>
 
+            </AnimatePresence>
           </CardContent>
         </Card>
       </div>
     </div>
   )
 }
+
 
