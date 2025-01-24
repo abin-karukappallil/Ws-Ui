@@ -28,7 +28,7 @@ export default function DarkWebScraper() {
     setIsLoading(true);
     try {
       if (method === "confidential-docs") {
-        const api = `http://localhost:8000/confi-doc?url=${url}`;
+        const api = `http://wsapi.abinthomas.dev:8000/confi-doc?url=${url}`;
         const response = await fetch(api);
         if (!response.ok) {
           throw new Error("Failed to fetch the file");
@@ -44,7 +44,7 @@ export default function DarkWebScraper() {
           window.URL.revokeObjectURL(fileURL);
         }
       } else if (method === "hidden-links") {
-        const api = `http://localhost:8000/scrape-hiddenlinks?url=${url}`
+        const api = `http://wsapi.abinthomas.dev:8000/scrape-hiddenlinks?url=${url}`
         const response = await fetch(api);
         if (!response.ok) {
           throw new Error("Failed to fetch the file");
@@ -61,7 +61,7 @@ export default function DarkWebScraper() {
         }
       } else if (method === "class") {
         try {
-          const api = `http://localhost:8000/scrape-class?url=${url}&_class=${selector}`;
+          const api = `http://wsapi.abinthomas.dev:8000/scrape-class?url=${url}&_class=${selector}`;
           console.log(api);
           const response = await axios.get(api);
           if (response.status !== 200) {
@@ -72,8 +72,34 @@ export default function DarkWebScraper() {
         } catch (error) {
           console.error(error);
         }
-      }
-    } catch (error) {
+      }else if(method=="id"){
+        try{
+        const api = `http://wsapi.abinthomas.dev:8000/scrape-id?url=${url}&_id=${selector}`;
+        const response = await axios.get(api);
+        if (response.status !== 200) {
+          throw new Error("Failed to fetch the data");
+        }
+        const data = await response.data;
+        setResults(data);
+        }catch(error){
+          console.error(error);
+        }
+      }else if (method === "element") {
+        try {
+            const api = `http://wsapi.abinthomas.dev:8000/scrape-element?url=${url}&element=${selector}`;
+            const response = await axios.get(api);
+            
+            if (response.status !== 200) {
+                throw new Error("Failed to fetch the data");
+            }
+            const data = await response.data;
+            setResults(data);
+        } catch (error) {
+            console.error("Error fetching element data:", error);
+        
+    } 
+  
+  }} catch (error) {
       console.error("Error during scrape:", error);
       setResults("An error occurred during the scraping process.");
     } finally {
@@ -95,7 +121,7 @@ export default function DarkWebScraper() {
       <div className="fixed inset-0 h-screen w-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
         <Card className="w-full max-w-md bg-gray-800 text-gray-100">
           <CardHeader className="bg-gradient-to-r from-blue-700 to-purple-800 rounded-t-lg">
-            <CardTitle className="text-2xl font-bold">Web Scraper</CardTitle>
+            <CardTitle className="text-2xl font-bold">Advanced Web Scraper For classes links and sensitive docs</CardTitle>
             <CardDescription className="text-gray-300">
               Enter a URL and select a scraping method to begin.
             </CardDescription>
@@ -168,49 +194,49 @@ export default function DarkWebScraper() {
             </form>
 
             <AnimatePresence>
-              {isLoading ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.5 }}
-                  className="mt-4"
-                >
-                  <pre className="bg-gray-700 p-2 rounded mt-2 overflow-x-auto text-sm text-gray-200">
-                    Scraping... this may take a while..☕
-                  </pre>
-                </motion.div>
-              ) : (
-                results && (
-                  method === "class" ? (
-                    <div className="bg-gray-700 p-2 rounded mt-2 overflow-x-auto max-h-60 text-sm text-gray-200">
-                      {Array.isArray(results) ? (
-                        results.map((item, index) => (
-                          <div key={index} className="mb-2 pb-2 border-b border-gray-600 last:border-b-0">
-                            {item.data}
-                          </div>
-                        ))
-                      ) : (
-                        <pre>{typeof results === "object" ? JSON.stringify(results, null, 2) : results}</pre>
-                      )}
-                    </div>
-                  ) : (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 20 }}
-                      transition={{ duration: 0.5 }}
-                      className="mt-4"
-                    >
-                      <pre className="bg-gray-700 p-2 rounded mt-2 overflow-x-auto text-sm text-gray-200">
-                        successfully scraped
-                      </pre>
-                    </motion.div>
-                  )
-                )
-              )}
+  {isLoading ? (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.5 }}
+      className="mt-4"
+    >
+      <pre className="bg-gray-700 p-2 rounded mt-2 overflow-x-auto text-sm text-gray-200">
+        Scraping... this may take a while..☕
+      </pre>
+    </motion.div>
+  ) : (
+    results && (
+      method === "class" || method=="id" || method=="element" ? (
+        <div className="bg-gray-700 p-2 rounded mt-2 overflow-x-auto max-h-60 text-sm text-gray-200">
+          {Array.isArray(results) ? (
+            results.map((item, index) => (
+              <div key={index} className="mb-2 pb-2 border-b border-gray-600 last:border-b-0">
+                {item.data}
+              </div>
+            ))
+          ) : (
+            <pre>{typeof results === "object" ? JSON.stringify(results, null, 2) : results}</pre>
+          )}
+        </div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.5 }}
+          className="mt-4"
+        >
+          <pre className="bg-gray-700 p-2 rounded mt-2 overflow-x-auto text-sm text-gray-200">
+            successfully scraped
+          </pre>
+        </motion.div>
+      )
+    )
+  )}
+</AnimatePresence>
 
-            </AnimatePresence>
           </CardContent>
         </Card>
       </div>
