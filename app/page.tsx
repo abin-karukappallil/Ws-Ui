@@ -28,7 +28,7 @@ export default function DarkWebScraper() {
     setIsLoading(true);
     try {
       if (method === "confidential-docs") {
-        const api = `http://wsapi.abinthomas.dev:8000/confi-doc?url=${url}`;
+        const api = `https://wsapi.abinthomas.dev/confi-doc?url=${url}`;
         const response = await fetch(api);
         if (!response.ok) {
           throw new Error("Failed to fetch the file");
@@ -44,7 +44,7 @@ export default function DarkWebScraper() {
           window.URL.revokeObjectURL(fileURL);
         }
       } else if (method === "hidden-links") {
-        const api = `http://wsapi.abinthomas.dev:8000/scrape-hiddenlinks?url=${url}`
+        const api = `https://wsapi.abinthomas.dev/scrape-hiddenlinks?url=${url}`
         const response = await fetch(api);
         if (!response.ok) {
           throw new Error("Failed to fetch the file");
@@ -61,7 +61,7 @@ export default function DarkWebScraper() {
         }
       } else if (method === "class") {
         try {
-          const api = `http://wsapi.abinthomas.dev:8000/scrape-class?url=${url}&_class=${selector}`;
+          const api = `https://wsapi.abinthomas.dev/scrape-class?url=${url}&_class=${selector}`;
           console.log(api);
           const response = await axios.get(api);
           if (response.status !== 200) {
@@ -74,7 +74,7 @@ export default function DarkWebScraper() {
         }
       }else if(method=="id"){
         try{
-        const api = `http://wsapi.abinthomas.dev:8000/scrape-id?url=${url}&_id=${selector}`;
+        const api = `https://wsapi.abinthomas.dev/scrape-id?url=${url}&_id=${selector}`;
         const response = await axios.get(api);
         if (response.status !== 200) {
           throw new Error("Failed to fetch the data");
@@ -86,7 +86,7 @@ export default function DarkWebScraper() {
         }
       }else if (method === "element") {
         try {
-            const api = `http://wsapi.abinthomas.dev:8000/scrape-element?url=${url}&element=${selector}`;
+            const api = `https://wsapi.abinthomas.dev/scrape-element?url=${url}&element=${selector}`;
             const response = await axios.get(api);
             
             if (response.status !== 200) {
