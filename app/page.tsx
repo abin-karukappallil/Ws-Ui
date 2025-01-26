@@ -45,7 +45,9 @@ export default function DarkWebScraper() {
         }
       } else if (method === "hidden-links") {
         const api = `https://wsapi.abinthomas.dev/scrape-hiddenlinks?url=${url}`
-        const response = await fetch(api)
+        const response = await fetch(api, {
+          mode: 'no-cors',
+        });        
         if (!response.ok) {
           throw new Error("Failed to fetch the file")
         } else {
