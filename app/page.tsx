@@ -27,80 +27,41 @@ export default function DarkWebScraper() {
     e.preventDefault()
     setIsLoading(true)
     try {
-      if (method === "confidential-docs") {
-        const api = `https://wsapi.abinthomas.dev/confi-doc?url=${url}`
-        const response = await fetch(api)
-        if (!response.ok) {
-          throw new Error("Failed to fetch the file")
-        } else {
-          const blob = await response.blob()
-          const fileURL = window.URL.createObjectURL(blob)
-          const link = document.createElement("a")
-          link.href = fileURL
-          link.download = "docsLink.txt"
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-          window.URL.revokeObjectURL(fileURL)
-        }
-      } else if (method === "hidden-links") {
-        const api = `https://wsapi.abinthomas.dev/scrape-hiddenlinks?url=${url}`
-        const response = await fetch(api, {
-          mode: 'no-cors',
-        });        
-        if (!response.ok) {
-          throw new Error("Failed to fetch the file")
-        } else {
-          const blob = await response.blob()
-          const fileURL = window.URL.createObjectURL(blob)
-          const link = document.createElement("a")
-          link.href = fileURL
-          link.download = "hiddenlinks.txt"
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-          window.URL.revokeObjectURL(fileURL)
-        }
-      } else if (method === "class") {
-        try {
-          const api = `https://wsapi.abinthomas.dev/scrape-class?url=${url}&_class=${selector}`
-          console.log(api)
-          const response = await axios.get(api)
-          if (response.status !== 200) {
-            throw new Error("Failed to fetch the data")
-          }
-          const data = response.data
-          setResults(data)
-        } catch (error) {
-          console.error(error)
-        }
-      } else if (method == "id") {
-        try {
-          const api = `https://wsapi.abinthomas.dev/scrape-id?url=${url}&_id=${selector}`
-          const response = await axios.get(api)
-          if (response.status !== 200) {
-            throw new Error("Failed to fetch the data")
-          }
-          const data = await response.data
-          setResults(data)
-        } catch (error) {
-          console.error(error)
-        }
-      } else if (method === "element") {
-        try {
-          const api = `https://wsapi.abinthomas.dev/scrape-element?url=${url}&element=${selector}`
-          const response = await axios.get(api)
-
-          if (response.status !== 200) {
-            throw new Error("Failed to fetch the data")
-          }
-          const data = await response.data
-          setResults(data)
-        } catch (error) {
-          console.error("Error fetching element data:", error)
-        }
-      }
-    } catch (error) {
+  if (method === "confidential-docs") {
+    const api = `https://wsapi.abinthomas.dev/confi-doc?url=${url}`;
+    const response = await fetch(api);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file: ${response.statusText}`);
+    } else {
+      const blob = await response.blob();
+      const fileURL = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = fileURL;
+      link.download = "docsLink.txt";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(fileURL);
+    }
+  } else if (method === "hidden-links") {
+    const api = `https://wsapi.abinthomas.dev/scrape-hiddenlinks?url=${url}`;
+    const response = await fetch(api, { mode: 'no-cors' });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file: ${response.statusText}`);
+    } else {
+      const blob = await response.blob();
+      const fileURL = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = fileURL;
+      link.download = "hiddenlinks.txt";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(fileURL);
+    }
+  }
+  // Other methods (class, id, element) go here as in your original code...
+}catch (error) {
       console.error("Error during scrape:", error)
       setResults("An error occurred during the scraping process.")
     } finally {
