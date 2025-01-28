@@ -24,7 +24,7 @@ export default function DarkWebScraper() {
     { name: "Scrape Confidential Documents", method: "confidential-docs", requiresSelector: false },
   ]
 
-  const handleScrape = async (e: React.FormEvent) => {
+    const handleScrape = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
@@ -48,20 +48,15 @@ export default function DarkWebScraper() {
           },
         });
       } else {
-        // Handle ID, class, and element scraping
+        // Handle ID, class, and element scraping with GET method
         const endpoint = method === "id" ? "scrape-id" : 
                         method === "class" ? "scrape-class" : "scrape-element";
         
-        response = await fetch(`https://wsapi.abinthomas.dev/${endpoint}`, {
-          method: 'POST',
+        response = await fetch(`https://wsapi.abinthomas.dev/${endpoint}?url=${encodeURIComponent(url)}&selector=${encodeURIComponent(selector)}`, {
+          method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
-          body: JSON.stringify({
-            url: url,
-            selector: selector
-          })
         });
       }
 
@@ -93,7 +88,6 @@ export default function DarkWebScraper() {
       setIsLoading(false);
     }
   }
-
   const currentFeature = scrapeFeatures.find((feature) => feature.method === method)
 
   useEffect(() => {
