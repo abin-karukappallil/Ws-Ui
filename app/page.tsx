@@ -24,7 +24,7 @@ export default function DarkWebScraper() {
     { name: "Scrape Confidential Documents", method: "confidential-docs", requiresSelector: false },
   ]
 
-    const handleScrape = async (e: React.FormEvent) => {
+const handleScrape = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
@@ -48,11 +48,17 @@ export default function DarkWebScraper() {
           },
         });
       } else {
-        // Handle ID, class, and element scraping with GET method
-        const endpoint = method === "id" ? "scrape-id" : 
-                        method === "class" ? "scrape-class" : "scrape-element";
+        // Handle element, class, and id scraping with correct parameter names
+        let queryParam;
+        if (method === "id") {
+          queryParam = "_id";
+        } else if (method === "class") {
+          queryParam = "_class";
+        } else {
+          queryParam = "element";
+        }
         
-        response = await fetch(`https://wsapi.abinthomas.dev/${endpoint}?url=${encodeURIComponent(url)}&selector=${encodeURIComponent(selector)}`, {
+        response = await fetch(`https://wsapi.abinthomas.dev/scrape-element?url=${encodeURIComponent(url)}&${queryParam}=${encodeURIComponent(selector)}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
