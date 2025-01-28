@@ -47,18 +47,23 @@ const handleScrape = async (e: React.FormEvent) => {
             'Accept': 'application/json',
           },
         });
+      } else if (method === "id") {
+        response = await fetch(`https://wsapi.abinthomas.dev/scrape-id?url=${encodeURIComponent(url)}&_id=${encodeURIComponent(selector)}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+      } else if (method === "class") {
+        response = await fetch(`https://wsapi.abinthomas.dev/scrape-class?url=${encodeURIComponent(url)}&_class=${encodeURIComponent(selector)}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
       } else {
-        // Handle element, class, and id scraping with correct parameter names
-        let queryParam;
-        if (method === "id") {
-          queryParam = "_id";
-        } else if (method === "class") {
-          queryParam = "_class";
-        } else {
-          queryParam = "element";
-        }
-        
-        response = await fetch(`https://wsapi.abinthomas.dev/scrape-element?url=${encodeURIComponent(url)}&${queryParam}=${encodeURIComponent(selector)}`, {
+        // Handle element scraping
+        response = await fetch(`https://wsapi.abinthomas.dev/scrape-element?url=${encodeURIComponent(url)}&element=${encodeURIComponent(selector)}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
