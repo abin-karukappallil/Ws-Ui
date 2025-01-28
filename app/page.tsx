@@ -7,12 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card"
 import { motion, AnimatePresence } from "framer-motion"
 import { Loader2 } from "lucide-react"
+
 export default function DarkWebScraper() {
   const [url, setUrl] = useState("")
   const [method, setMethod] = useState("id")
   const [selector, setSelector] = useState("")
   const [results, setResults] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const scrapeFeatures = [
     { name: "Scrape with ID", method: "id", requiresSelector: true },
@@ -25,46 +27,70 @@ export default function DarkWebScraper() {
   const handleScrape = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError("")
+    setResults("")
+
     try {
-  if (method === "confidential-docs") {
-    const api = `https://wsapi.abinthomas.dev/confi-doc?url=${url}`;
-    const response = await fetch(api);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch file: ${response.statusText}`);
-    } else {
-      const blob = await response.blob();
-      const fileURL = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = fileURL;
-      link.download = "docsLink.txt";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(fileURL);
-    }
-  } else if (method === "hidden-links") {
-    const api = `https://wsapi.abinthomas.dev/scrape-hiddenlinks?url=${url}`;
-    const response = await fetch(api, { mode: 'no-cors' });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch file: ${response.statusText}`);
-    } else {
-      const blob = await response.blob();
-      const fileURL = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = fileURL;
-      link.download = "hiddenlinks.txt";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(fileURL);
-    }
-  }
-  // Other methods (class, id, element) go here as in your original code...
-}catch (error) {
-      console.error("Error during scrape:", error)
-      setResults("An error occurred during the scraping process.")
+      let response;
+      
+      if (method === "confidential-docs") {
+        response = await fetch(`https://wsapi.abinthomas.dev/confi-doc?url=${encodeURIComponent(url)}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+      } else if (method === "hidden-links") {
+        response = await fetch(`https://wsapi.abinthomas.dev/scrape-hiddenlinks?url=${encodeURIComponent(url)}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+      } else {
+        // Handle ID, class, and element scraping
+        const endpoint = method === "id" ? "scrape-id" : 
+                        method === "class" ? "scrape-class" : "scrape-element";
+        
+        response = await fetch(`https://wsapi.abinthomas.dev/${endpoint}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({
+            url: url,
+            selector: selector
+          })
+        });
+      }
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+
+      const contentType = response.headers.get("content-type");
+      
+      if (contentType?.includes("application/json")) {
+        const data = await response.json();
+        setResults(data);
+      } else {
+        const blob = await response.blob();
+        const fileURL = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = fileURL;
+        link.download = method === "hidden-links" ? "hiddenlinks.txt" : "docsLink.txt";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(fileURL);
+        setResults("Download completed successfully");
+      }
+    } catch (error) {
+      console.error("Error during scrape:", error);
+      setError(error instanceof Error ? error.message : "An error occurred during the scraping process.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -151,15 +177,36 @@ export default function DarkWebScraper() {
               >
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2 px-4 rounded-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
-                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2 px-4 rounded-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  disabled={isLoading || !url}
                 >
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Scrape"}
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Scraping...
+                    </>
+                  ) : (
+                    "Scrape"
+                  )}
                 </Button>
               </motion.div>
             </form>
 
             <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.5 }}
+                  className="mt-4"
+                >
+                  <pre className="bg-red-900/50 text-red-200 p-4 rounded-md mt-2 overflow-x-auto text-sm border border-red-800">
+                    {error}
+                  </pre>
+                </motion.div>
+              )}
+
               {isLoading ? (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -173,8 +220,7 @@ export default function DarkWebScraper() {
                   </pre>
                 </motion.div>
               ) : (
-                results &&
-                (method === "class" || method === "id" || method === "element" ? (
+                results && (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -194,19 +240,7 @@ export default function DarkWebScraper() {
                       )}
                     </div>
                   </motion.div>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ duration: 0.5 }}
-                    className="mt-4"
-                  >
-                    <pre className="bg-gray-700 p-4 rounded-md mt-2 overflow-x-auto text-sm text-gray-200 border border-gray-600">
-                      Successfully scraped
-                    </pre>
-                  </motion.div>
-                ))
+                )
               )}
             </AnimatePresence>
           </CardContent>
@@ -215,4 +249,3 @@ export default function DarkWebScraper() {
     </div>
   )
 }
-
