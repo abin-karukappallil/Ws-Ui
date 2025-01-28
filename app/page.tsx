@@ -7,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card"
 import { motion, AnimatePresence } from "framer-motion"
 import { Loader2 } from "lucide-react"
-import axios from "axios"
 export default function DarkWebScraper() {
   const [url, setUrl] = useState("")
   const [method, setMethod] = useState("id")
