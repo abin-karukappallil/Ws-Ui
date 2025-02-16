@@ -34,28 +34,28 @@ const handleScrape = async (e: React.FormEvent) => {
       let response;
       
       if (method === "confidential-docs") {
-        response = await fetch(`https://wsapi.abinthomas.dev/confi-doc?url=${encodeURIComponent(url)}`, {
+        response = await fetch(`https://advanced-web-scraper.vercel.app/confi-doc?url=${encodeURIComponent(url)}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
           },
         });
       } else if (method === "hidden-links") {
-        response = await fetch(`https://wsapi.abinthomas.dev/scrape-hiddenlinks?url=${encodeURIComponent(url)}`, {
+        response = await fetch(`https://advanced-web-scraper.vercel.app/scrape-hiddenlinks?url=${encodeURIComponent(url)}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
           },
         });
       } else if (method === "id") {
-        response = await fetch(`https://wsapi.abinthomas.dev/scrape-id?url=${encodeURIComponent(url)}&_id=${encodeURIComponent(selector)}`, {
+        response = await fetch(`https://advanced-web-scraper.vercel.app/scrape-id?url=${encodeURIComponent(url)}&_id=${encodeURIComponent(selector)}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
           },
         });
       } else if (method === "class") {
-        response = await fetch(`https://wsapi.abinthomas.dev/scrape-class?url=${encodeURIComponent(url)}&_class=${encodeURIComponent(selector)}`, {
+        response = await fetch(`https://advanced-web-scraper.vercel.app/scrape-class?url=${encodeURIComponent(url)}&_class=${encodeURIComponent(selector)}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -63,7 +63,7 @@ const handleScrape = async (e: React.FormEvent) => {
         });
       } else {
         // Handle element scraping
-        response = await fetch(`https://wsapi.abinthomas.dev/scrape-element?url=${encodeURIComponent(url)}&element=${encodeURIComponent(selector)}`, {
+        response = await fetch(`https://advanced-web-scraper.vercel.app/scrape-element?url=${encodeURIComponent(url)}&element=${encodeURIComponent(selector)}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
