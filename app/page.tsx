@@ -6,7 +6,7 @@ import { Input } from "../components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card"
 import { motion, AnimatePresence } from "framer-motion"
-import { Loader2 } from "lucide-react"
+import { Loader2 } from 'lucide-react'
 
 export default function DarkWebScraper() {
   const [url, setUrl] = useState("")
@@ -23,8 +23,7 @@ export default function DarkWebScraper() {
     { name: "Scrape Hidden Links", method: "hidden-links", requiresSelector: false },
     { name: "Scrape Confidential Documents", method: "confidential-docs", requiresSelector: false },
   ]
-
-const handleScrape = async (e: React.FormEvent) => {
+  const handleScrape = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
@@ -62,7 +61,6 @@ const handleScrape = async (e: React.FormEvent) => {
           },
         });
       } else {
-        // Handle element scraping
         response = await fetch(`https://wsapi.abinthomas.dev/scrape-element?url=${encodeURIComponent(url)}&element=${encodeURIComponent(selector)}`, {
           method: 'GET',
           headers: {
@@ -99,97 +97,139 @@ const handleScrape = async (e: React.FormEvent) => {
       setIsLoading(false);
     }
   }
+
   const currentFeature = scrapeFeatures.find((feature) => feature.method === method)
 
   useEffect(() => {
     if (!currentFeature?.requiresSelector) {
       setSelector("")
     }
-  }, [method, currentFeature])
+  }, [currentFeature?.requiresSelector])
 
   return (
-    <div className="min-h-screen w-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      <div className="fixed inset-0 h-screen w-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-        <Card className="w-full max-w-md md:max-w-2xl lg:max-w-3xl bg-gray-800 text-gray-100 shadow-lg border border-gray-700">
-          <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-700 rounded-t-lg border-b border-gray-700">
-            <CardTitle className="text-2xl font-bold text-purple-400">Advanced Web Scraper</CardTitle>
-            <CardDescription className="text-gray-400">
-              Scrape classes, links, and sensitive documents with ease.
-            </CardDescription>
+    <div className="min-h-screen w-full bg-zinc-900 flex items-center justify-center p-4 relative overflow-hidden">
+      <motion.div
+        className="absolute inset-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-blue-500/5 to-zinc-900/20" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05),transparent_50%)]" />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md md:max-w-2xl lg:max-w-3xl relative z-10"
+      >
+        <Card className="relative overflow-hidden bg-zinc-800/40 backdrop-blur-xl border-zinc-700/50">
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-transparent"
+            animate={{
+              scale: [1, 1.1, 1],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+          />
+          
+          <CardHeader className="relative z-10">
+            <motion.div
+              initial={{ y: -20 }}
+              animate={{ y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <CardTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-100 to-slate-100">
+              Advanced Web Scraper
+              </CardTitle>
+              <CardDescription className="text-zinc-400 mt-2">
+                Scrape classes, links, and documents with ease.
+              </CardDescription>
+            </motion.div>
           </CardHeader>
-          <CardContent className="mt-4 p-6 md:p-8">
-            <form onSubmit={handleScrape} className="space-y-4 max-w-lg mx-auto">
-              <div className="space-y-4">
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <Input
-                    type="url"
-                    placeholder="Enter website URL"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    required
-                    className="w-full border-2 border-gray-600 focus:border-purple-500 rounded-md bg-gray-700 text-gray-100 placeholder-gray-400 transition-all duration-300"
-                  />
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                >
-                  <Select value={method} onValueChange={setMethod}>
-                    <SelectTrigger className="w-full border-2 border-gray-600 focus:border-purple-500 rounded-md bg-gray-700 text-gray-100 transition-all duration-300">
-                      <SelectValue placeholder="Select scraping method" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800 text-gray-100 border-gray-700">
-                      {scrapeFeatures.map((feature) => (
-                        <SelectItem
-                          key={feature.method}
-                          value={feature.method}
-                          className="focus:bg-purple-700 cursor-pointer"
-                        >
-                          {feature.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </motion.div>
-                <AnimatePresence>
-                  {currentFeature?.requiresSelector && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <Input
-                        type="text"
-                        placeholder="Enter selector (ID, class, or element)"
-                        value={selector}
-                        onChange={(e) => setSelector(e.target.value)}
-                        className="w-full border-2 border-gray-600 focus:border-purple-500 rounded-md bg-gray-700 text-gray-100 placeholder-gray-400 transition-all duration-300"
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+
+          <CardContent className="relative z-10 space-y-6">
+            <form onSubmit={handleScrape} className="space-y-4">
               <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Input
+                  type="url"
+                  placeholder="Enter website URL"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  required
+                  className="bg-zinc-700/30 backdrop-blur-sm border-zinc-600/50 text-zinc-200 placeholder:text-zinc-400"
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <Select value={method} onValueChange={setMethod}>
+                  <SelectTrigger className="bg-zinc-700/30 backdrop-blur-sm border-zinc-600/50 text-zinc-200">
+                    <SelectValue placeholder="Select scraping method" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800/90 backdrop-blur-md border-zinc-700/50">
+                    {scrapeFeatures.map((feature) => (
+                      <SelectItem
+                        key={feature.method}
+                        value={feature.method}
+                        className="text-zinc-200 focus:bg-zinc-700/50 focus:text-zinc-200"
+                      >
+                        {feature.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </motion.div>
+
+              <AnimatePresence>
+                {currentFeature?.requiresSelector && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Input
+                      type="text"
+                      placeholder="Enter selector (ID, class, or element)"
+                      value={selector}
+                      onChange={(e) => setSelector(e.target.value)}
+                      className="bg-zinc-700/30 backdrop-blur-sm border-zinc-600/50 text-zinc-200 placeholder:text-zinc-400"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2 px-4 rounded-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="w-full bg-white hover:bg-slate-100 text-black"
                   disabled={isLoading || !url}
                 >
                   {isLoading ? (
-                    <>
+                    <motion.div
+                      className="flex items-center justify-center"
+                      animate={{ opacity: [1, 0.5, 1] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                    >
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Scraping...
-                    </>
+                    </motion.div>
                   ) : (
                     "Scrape"
                   )}
@@ -203,54 +243,28 @@ const handleScrape = async (e: React.FormEvent) => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.5 }}
-                  className="mt-4"
+                  className="bg-red-900/20 backdrop-blur-sm border border-red-800/50 text-red-400 p-4 rounded-md"
                 >
-                  <pre className="bg-red-900/50 text-red-200 p-4 rounded-md mt-2 overflow-x-auto text-sm border border-red-800">
-                    {error}
-                  </pre>
+                  {error}
                 </motion.div>
               )}
 
-              {isLoading ? (
+              {results && !isLoading && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.5 }}
-                  className="mt-4"
+                  className="bg-zinc-700/20 backdrop-blur-sm border border-zinc-600/50 rounded-md p-4 max-h-60 md:max-h-96 overflow-auto"
                 >
-                  <pre className="bg-gray-700 p-4 rounded-md mt-2 overflow-x-auto text-sm text-gray-200 border border-gray-600">
-                    Scraping... this may take a while... ☕
+                  <pre className="text-zinc-200 text-sm">
+                    {typeof results === "object" ? JSON.stringify(results, null, 2) : results}
                   </pre>
                 </motion.div>
-              ) : (
-                results && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ duration: 0.5 }}
-                    className="mt-4"
-                  >
-                    <div className="bg-gray-700 p-4 rounded-md mt-2 overflow-x-auto max-h-60 md:max-h-96 text-sm md:text-base text-gray-200 border border-gray-600">
-                      {Array.isArray(results) ? (
-                        results.map((item, index) => (
-                          <div key={index} className="mb-2 pb-2 border-b border-gray-600 last:border-b-0">
-                            {item.data}
-                          </div>
-                        ))
-                      ) : (
-                        <pre>{typeof results === "object" ? JSON.stringify(results, null, 2) : results}</pre>
-                      )}
-                    </div>
-                  </motion.div>
-                )
               )}
             </AnimatePresence>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
     </div>
   )
 }
