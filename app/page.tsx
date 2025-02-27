@@ -249,17 +249,26 @@ export default function DarkWebScraper() {
                 </motion.div>
               )}
 
-              {results && !isLoading && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  className="bg-zinc-700/20 backdrop-blur-sm border border-zinc-600/50 rounded-md p-4 max-h-60 md:max-h-96 overflow-auto"
-                >
-                  <pre className="text-zinc-200 text-sm">
-                    {typeof results === "object" ? JSON.stringify(results, null, 2) : results}
-                  </pre>
-                </motion.div>
+              {results && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.5 }}
+                     className="bg-zinc-700/20 backdrop-blur-sm border border-zinc-600/50 rounded-md p-4 max-h-60 md:max-h-96 overflow-auto"
+                  >
+                    <div  className="text-zinc-200 text-sm">
+                      {Array.isArray(results) ? (
+                        results.map((item, index) => (
+                          <div key={index} className="mb-2 pb-2 border-b border-gray-600 last:border-b-0">
+                            {item.data}
+                          </div>
+                        ))
+                      ) : (
+                        <pre>{typeof results === "object" ? JSON.stringify(results, null, 2) : results}</pre>
+                      )}
+                    </div>
+                  </motion.div>
               )}
             </AnimatePresence>
           </CardContent>
