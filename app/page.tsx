@@ -13,10 +13,11 @@ export default function DarkWebScraper() {
   const [method, setMethod] = useState("id")
   const [selector, setSelector] = useState("")
   const [results, setResults] = useState("")
+  const [results2, setResults2] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [parallel, setParallel] = useState(false);
-  const [selector2 , setSelector2]= useState("");
+  const [selector2, setSelector2] = useState("");
   const scrapeFeatures = [
     { name: "Scrape with ID", method: "id", requiresSelector: true },
     { name: "Scrape with Class", method: "class", requiresSelector: true },
@@ -27,6 +28,9 @@ export default function DarkWebScraper() {
   const onParallel = () => {
     setParallel(prevParallel => {
       const newParallel = !prevParallel;
+      if(!newParallel) {
+        setSelector2("");
+      }
       return newParallel;
     });
   };
@@ -37,8 +41,8 @@ export default function DarkWebScraper() {
     setResults("")
 
     try {
-      let response,response2;
-      
+      let response, response2;
+
       if (method === "confidential-docs") {
         response = await fetch(`https://wsapi.abinthomas.dev/confi-doc?url=${encodeURIComponent(url)}`, {
           method: 'GET',
@@ -87,16 +91,16 @@ export default function DarkWebScraper() {
       }
 
       const contentType = response.headers.get("content-type");
-      
+
       if (contentType?.includes("application/json")) {
-        if(method=="class"){
+        if (method == "class" && response2) {
           const data = await response.json();
-          const data2 = await response.json();
-          const finalData = data+" "+data2;
-          console.log()
-        }else{
+          const data2 = await response2.json();
+          setResults(data)
+          setResults2(data2);
+        } else {
           const data = await response.json();
-        setResults(data);
+          setResults(data);
         }
       } else {
         const blob = await response.blob();
@@ -119,7 +123,6 @@ export default function DarkWebScraper() {
   }
 
   const currentFeature = scrapeFeatures.find((feature) => feature.method === method)
-var pl;
   useEffect(() => {
     if (!currentFeature?.requiresSelector) {
       setSelector("")
@@ -157,7 +160,7 @@ var pl;
               repeatType: "reverse",
             }}
           />
-          
+
           <CardHeader className="relative z-10">
             <motion.div
               initial={{ y: -20 }}
@@ -165,7 +168,7 @@ var pl;
               transition={{ duration: 0.6 }}
             >
               <CardTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-100 to-slate-100">
-              Advanced Web Scraper
+                Advanced Web Scraper
               </CardTitle>
               <CardDescription className="text-zinc-400 mt-2">
                 Scrape classes, links, and documents with ease.
@@ -221,16 +224,16 @@ var pl;
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3 }}
                   >
-                  {method == "class" && (
-                    <div className="flex mb-4 flex-row items-center justify-start gap-3">
-                    <p className="text-zinc-200">Parallel scrapping</p>
-                    <Switch
-                    onCheckedChange={onParallel}
-                    className="bg-zinc-700/50"
-                    aria-readonly
-                  />
-                  </div>
-                  ) }
+                    {method == "class" && (
+                      <div className="flex mb-4 flex-row items-center justify-start gap-3">
+                        <p className="text-zinc-200">Parallel scrapping</p>
+                        <Switch
+                          onCheckedChange={onParallel}
+                          className="bg-zinc-700/50"
+                          aria-readonly
+                        />
+                      </div>
+                    )}
                     <Input
                       type="text"
                       placeholder="Enter selector (id, class, element)"
@@ -238,16 +241,17 @@ var pl;
                       onChange={(e) => setSelector(e.target.value)}
                       className="bg-zinc-700/30 mb-4 backdrop-blur-sm border-zinc-600/50 text-zinc-200 placeholder:text-zinc-400"
                     />
-                    
-                  {parallel && (
-                    <Input
-                    type="text"
-                    placeholder="Enter selector 2 (id, class, element)"
-                    value={selector2}
-                    onChange={(e) => setSelector2(e.target.value)}
-                    className="bg-zinc-700/30 backdrop-blur-sm border-zinc-600/50 text-zinc-200 placeholder:text-zinc-400"
-                  />
-                  )}
+
+                    {parallel && (
+                      <Input
+                        type="text"
+                        required
+                        placeholder="Enter selector 2 (id, class, element)"
+                        value={selector2}
+                        onChange={(e) => setSelector2(e.target.value)}
+                        className="bg-zinc-700/30 backdrop-blur-sm border-zinc-600/50 text-zinc-200 placeholder:text-zinc-400"
+                      />
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -290,25 +294,28 @@ var pl;
               )}
 
               {results && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ duration: 0.5 }}
-                     className="bg-zinc-700/20 backdrop-blur-sm border border-zinc-600/50 rounded-md p-4 max-h-60 md:max-h-96 overflow-auto"
-                  >
-                    <div  className="text-zinc-200 text-sm">
-                      {Array.isArray(results) ? (
-                        results.map((item, index) => (
-                          <div key={index} className="mb-2 pb-2 border-b border-gray-600 last:border-b-0">
-                            {item.data}
-                          </div>
-                        ))
-                      ) : (
-                        <pre>{typeof results === "object" ? JSON.stringify(results, null, 2) : results}</pre>
-                      )}
-                    </div>
-                  </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.5 }}
+                  className="bg-zinc-700/20 backdrop-blur-sm border border-zinc-600/50 rounded-md p-4 max-h-60 md:max-h-96 overflow-auto"
+                >
+                  <div className="text-zinc-200 text-sm">
+                    {Array.isArray(results) && Array.isArray(results2) ? (
+                      results.map((item, index) => (
+                        <div key={index} className="mb-2 pb-2 border-b border-gray-600 last:border-b-0">
+                          {item.data+" "}
+                          {results2[index] ? results2[index].data : null}
+                        </div>
+                      ))
+                    ) : (
+                      <pre>{typeof results === "object" ? JSON.stringify(results, null, 2) : results}</pre>
+                    )}
+
+
+                  </div>
+                </motion.div>
               )}
             </AnimatePresence>
           </CardContent>
