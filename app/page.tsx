@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card"
 import { motion, AnimatePresence } from "framer-motion"
 import { Loader2 } from 'lucide-react'
-
+import { Switch } from "../components/ui/switch"
 export default function DarkWebScraper() {
   const [url, setUrl] = useState("")
   const [method, setMethod] = useState("id")
@@ -15,7 +15,8 @@ export default function DarkWebScraper() {
   const [results, setResults] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-
+  const [parallel, setParallel] = useState(false);
+  const [selector2 , setSelector2]= useState("");
   const scrapeFeatures = [
     { name: "Scrape with ID", method: "id", requiresSelector: true },
     { name: "Scrape with Class", method: "class", requiresSelector: true },
@@ -23,6 +24,12 @@ export default function DarkWebScraper() {
     { name: "Scrape Hidden Links", method: "hidden-links", requiresSelector: false },
     { name: "Scrape Confidential Documents", method: "confidential-docs", requiresSelector: false },
   ]
+  const onParallel = () => {
+    setParallel(prevParallel => {
+      const newParallel = !prevParallel;
+      return newParallel;
+    });
+  };
   const handleScrape = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -30,7 +37,7 @@ export default function DarkWebScraper() {
     setResults("")
 
     try {
-      let response;
+      let response,response2;
       
       if (method === "confidential-docs") {
         response = await fetch(`https://wsapi.abinthomas.dev/confi-doc?url=${encodeURIComponent(url)}`, {
@@ -60,6 +67,12 @@ export default function DarkWebScraper() {
             'Accept': 'application/json',
           },
         });
+        response2 = await fetch(`https://wsapi.abinthomas.dev/scrape-class?url=${encodeURIComponent(url)}&_class=${encodeURIComponent(selector2)}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
       } else {
         response = await fetch(`https://wsapi.abinthomas.dev/scrape-element?url=${encodeURIComponent(url)}&element=${encodeURIComponent(selector)}`, {
           method: 'GET',
@@ -76,8 +89,15 @@ export default function DarkWebScraper() {
       const contentType = response.headers.get("content-type");
       
       if (contentType?.includes("application/json")) {
-        const data = await response.json();
+        if(method=="class"){
+          const data = await response.json();
+          const data2 = await response.json();
+          const finalData = data+" "+data2;
+          console.log()
+        }else{
+          const data = await response.json();
         setResults(data);
+        }
       } else {
         const blob = await response.blob();
         const fileURL = window.URL.createObjectURL(blob);
@@ -99,7 +119,7 @@ export default function DarkWebScraper() {
   }
 
   const currentFeature = scrapeFeatures.find((feature) => feature.method === method)
-
+var pl;
   useEffect(() => {
     if (!currentFeature?.requiresSelector) {
       setSelector("")
@@ -201,13 +221,33 @@ export default function DarkWebScraper() {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3 }}
                   >
+                  {method == "class" && (
+                    <div className="flex mb-4 flex-row items-center justify-start gap-3">
+                    <p className="text-zinc-200">Parallel scrapping</p>
+                    <Switch
+                    onCheckedChange={onParallel}
+                    className="bg-zinc-700/50"
+                    aria-readonly
+                  />
+                  </div>
+                  ) }
                     <Input
                       type="text"
-                      placeholder="Enter selector (ID, class, or element)"
+                      placeholder="Enter selector (id, class, element)"
                       value={selector}
                       onChange={(e) => setSelector(e.target.value)}
-                      className="bg-zinc-700/30 backdrop-blur-sm border-zinc-600/50 text-zinc-200 placeholder:text-zinc-400"
+                      className="bg-zinc-700/30 mb-4 backdrop-blur-sm border-zinc-600/50 text-zinc-200 placeholder:text-zinc-400"
                     />
+                    
+                  {parallel && (
+                    <Input
+                    type="text"
+                    placeholder="Enter selector 2 (id, class, element)"
+                    value={selector2}
+                    onChange={(e) => setSelector2(e.target.value)}
+                    className="bg-zinc-700/30 backdrop-blur-sm border-zinc-600/50 text-zinc-200 placeholder:text-zinc-400"
+                  />
+                  )}
                   </motion.div>
                 )}
               </AnimatePresence>
