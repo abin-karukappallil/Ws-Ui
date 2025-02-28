@@ -98,6 +98,7 @@ export default function DarkWebScraper() {
           const data2 = await response2.json();
           setResults(data)
           setResults2(data2);
+          setParallel(false);
         } else {
           const data = await response.json();
           setResults(data);
